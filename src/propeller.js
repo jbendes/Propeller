@@ -98,13 +98,13 @@
             this.touchElement.addEventListener('touchend', this.onRotationStop);
             this.touchElement.addEventListener('touchcancel', this.onRotationStop);
             this.touchElement.addEventListener('dragstart', this.returnFalse);
-        } else {
-            this.touchElement.addEventListener('mousedown', this.onRotationStart);
-            this.touchElement.addEventListener('mousemove', this.onRotated);
-            this.touchElement.addEventListener('mouseup', this.onRotationStop);
-            this.touchElement.addEventListener('mouseleave', this.onRotationStop);
-            this.touchElement.addEventListener('dragstart', this.returnFalse);
         }
+
+        this.touchElement.addEventListener('mousedown', this.onRotationStart);
+        this.touchElement.addEventListener('mousemove', this.onRotated);
+        this.touchElement.addEventListener('mouseup', this.onRotationStop);
+        this.touchElement.addEventListener('mouseleave', this.onRotationStop);
+        this.touchElement.addEventListener('dragstart', this.returnFalse);
 
         this.touchElement.ondragstart = this.returnFalse;
     }
@@ -118,13 +118,13 @@
             this.touchElement.removeEventListener('touchend', this.onRotationStop);
             this.touchElement.removeEventListener('touchcancel', this.onRotationStop);
             this.touchElement.removeEventListener('dragstart', this.returnFalse);
-        } else {
-            this.touchElement.removeEventListener('mousedown', this.onRotationStart);
-            this.touchElement.removeEventListener('mousemove', this.onRotated);
-            this.touchElement.removeEventListener('mouseup', this.onRotationStop);
-            this.touchElement.removeEventListener('mouseleave', this.onRotationStop);
-            this.touchElement.removeEventListener('dragstart', this.returnFalse);
         }
+
+        this.touchElement.removeEventListener('mousedown', this.onRotationStart);
+        this.touchElement.removeEventListener('mousemove', this.onRotated);
+        this.touchElement.removeEventListener('mouseup', this.onRotationStop);
+        this.touchElement.removeEventListener('mouseleave', this.onRotationStop);
+        this.touchElement.removeEventListener('dragstart', this.returnFalse);
     }
 
     p.bind = function () {
@@ -297,9 +297,9 @@
     }
 
     p.initCoordinates = function () {
-        var elementOffset = this.getViewOffset();
-        this.cx = elementOffset.x + (this.element.offsetWidth / 2);
-        this.cy = elementOffset.y + (this.element.offsetHeight / 2);
+        var rect = this.element.getBoundingClientRect();
+        this.cx = (rect.right + rect.left) / 2;
+        this.cy = (rect.top + rect.bottom) / 2;
     }
 
     p.initDrag = function () {
@@ -400,76 +400,6 @@
                 self.transiting = false;
             }, this.stepTransitionTime);
             this.transiting = true;
-        }
-    }
-
-    //Calculating pageX, pageY for elements with offset parents
-    p.getViewOffset = function (singleFrame) {
-        var coords = {x: 0, y: 0};
-
-        if (this.element)
-            this.addOffset(this.element, coords, 'defaultView' in document ? document.defaultView : document.parentWindow);
-
-        return coords;
-    }
-
-    p.addOffset = function (node, coords, view) {
-        var p = node.offsetParent;
-        coords.x += node.offsetLeft - (p ? p.scrollLeft : 0);
-        coords.y += node.offsetTop - (p ? p.scrollTop : 0);
-
-        if (p) {
-            if (p.nodeType == 1) {
-                var parentStyle = view.getComputedStyle(p, '');
-                if (parentStyle.position != 'static') {
-                    coords.x += parseInt(parentStyle.borderLeftWidth);
-                    coords.y += parseInt(parentStyle.borderTopWidth);
-
-                    if (p.localName.toLowerCase() == 'table') {
-                        coords.x += parseInt(parentStyle.paddingLeft);
-                        coords.y += parseInt(parentStyle.paddingTop);
-                    }
-                    else if (p.localName.toLowerCase() == 'body') {
-                        var style = view.getComputedStyle(node, '');
-                        coords.x += parseInt(style.marginLeft);
-                        coords.y += parseInt(style.marginTop);
-                    }
-                }
-                else if (p.localName.toLowerCase() == 'body') {
-                    coords.x += parseInt(parentStyle.borderLeftWidth);
-                    coords.y += parseInt(parentStyle.borderTopWidth);
-                }
-
-                var parent = node.parentNode;
-                while (p != parent) {
-                    coords.x -= parent.scrollLeft;
-                    coords.y -= parent.scrollTop;
-                    parent = parent.parentNode;
-                }
-                this.addOffset(p, coords, view);
-            }
-        }
-        else {
-            if (node.localName.toLowerCase() == 'body') {
-                var style = view.getComputedStyle(node, '');
-                coords.x += parseInt(style.borderLeftWidth);
-                coords.y += parseInt(style.borderTopWidth);
-
-                var htmlStyle = view.getComputedStyle(node.parentNode, '');
-                coords.x += parseInt(htmlStyle.paddingLeft);
-                coords.y += parseInt(htmlStyle.paddingTop);
-                coords.x += parseInt(htmlStyle.marginLeft);
-                coords.y += parseInt(htmlStyle.marginTop);
-            }
-
-            if (node.scrollLeft)
-                coords.x += node.scrollLeft;
-            if (node.scrollTop)
-                coords.y += node.scrollTop;
-
-            var win = node.ownerDocument.defaultView;
-            if (win && (win.frameElement))
-                this.addOffset(win.frameElement, coords, win);
         }
     }
 
